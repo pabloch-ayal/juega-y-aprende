@@ -71,6 +71,12 @@ class MainActivity : AppCompatActivity() {
             showMenu(speakGreeting = true)
         }
 
+        val btnChangeVoice = findViewById<Button>(R.id.btnChangeVoice)
+        btnChangeVoice.setOnClickListener {
+            val info = voiceHelper.switchToNextVoice()
+            btnChangeVoice.text = "🗣️ Voz ($info)"
+        }
+
         findViewById<Button>(R.id.btnChangeName).setOnClickListener {
             voiceHelper.stop()
             hideBeeGuide()
@@ -251,7 +257,7 @@ class MainActivity : AppCompatActivity() {
         } else {
             voiceHelper.playWrongSound()
             animateShake(clickedView)
-            voiceHelper.speak("Ese es $spokenLabel. Mira, la abejita te ayuda, $childName.")
+            voiceHelper.speak("Ese es $spokenLabel. ¡Mira a la abejita!")
             if (correctView != null) flyBeeToTarget(correctView)
         }
     }

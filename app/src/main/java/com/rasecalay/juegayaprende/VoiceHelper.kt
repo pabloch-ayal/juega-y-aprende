@@ -6,16 +6,20 @@ import android.media.ToneGenerator
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
+import android.speech.tts.Voice
 import java.util.Locale
 import java.util.UUID
 
 class VoiceHelper(context: Context) {
+    private val appContext = context.applicationContext
     private var tts: TextToSpeech? = null
     private var isReady = false
     private val toneGen = ToneGenerator(AudioManager.STREAM_MUSIC, 85)
+    private var spanishVoices: List<Voice> = emptyList()
+    private var currentVoiceIndex = 0
 
     init {
-        tts = TextToSpeech(context.applicationContext) { status ->
+        tts = TextToSpeech(appContext) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 val engine = tts ?: return@TextToSpeech
                 val res = engine.setLanguage(Locale("es", "US"))
@@ -24,34 +28,45 @@ class VoiceHelper(context: Context) {
                 }
 
                 try {
-                    val voices = engine.voices?.filter { it.locale.language == "es" } ?: emptyList()
-                    // Códigos conocidos de voces femeninas de Google TTS en español
-                    val femaleCodes = listOf("sfb", "eef", "esd", "tpf", "f00", "female", "mujer", "sabina", "paulina", "monica", "helena", "laura")
-                    // Excluir explícitamente voces masculinas
-                    val maleCodes = listOf("sfd", "eec", "esf", "tpd", "m00", "male", "hombre", "jorge", "diego", "carlos", "pablo")
+                    spanishVoices = (engine.voices?.filter {
+                        it.locale.language == "es" && !it.isNetworkConnectionRequired
+                    } ?: emptyList()).sortedBy { it.name }
 
-                    val chosenVoice = voices.firstOrNull { v ->
-                        val n = v.name.lowercase()
-                        !v.isNetworkConnectionRequired && femaleCodes.any { n.contains(it) }
-                    } ?: voices.firstOrNull { v ->
-                        val n = v.name.lowercase()
-                        femaleCodes.any { n.contains(it) }
-                    } ?: voices.firstOrNull { v ->
-                        val n = v.name.lowercase()
-                        !v.isNetworkConnectionRequired && maleCodes.none { n.contains(it) }
-                    }
+                    val prefs = appContext.getSharedPreferences("juega_aprende_prefs", Context.MODE_PRIVATE)
+                    val savedName = prefs.getString("saved_voice_name", null)
+                    val savedIdx = spanishVoices.indexOfFirst { it.name == savedName }
 
-                    if (chosenVoice != null) {
-                        engine.voice = chosenVoice
+                    if (savedIdx >= 0) {
+                        currentVoiceIndex = savedIdx
+                        engine.voice = spanishVoices[currentVoiceIndex]
+                    } else if (spanishVoices.isNotEmpty()) {
+                        engine.voice = spanishVoices[0]
                     }
                 } catch (_: Exception) {}
 
-                // Tono fino, dulce y melodioso
-                engine.setPitch(1.25f)
-                engine.setSpeechRate(0.90f)
+                engine.setPitch(1.22f)
+                engine.setSpeechRate(0.92f)
                 isReady = true
             }
         }
+    }
+
+    fun switchToNextVoice(): String {
+        val engine = tts ?: return "Sin voces"
+        if (spanishVoices.isEmpty()) {
+            speak("Solo hay una voz disponible en este teléfono.")
+            return "1/1"
+        }
+        currentVoiceIndex = (currentVoiceIndex + 1) % spanishVoices.size
+        val selected = spanishVoices[currentVoiceIndex]
+        engine.voice = selected
+
+        appContext.getSharedPreferences("juega_aprende_prefs", Context.MODE_PRIVATE)
+            .edit().putString("saved_voice_name", selected.name).apply()
+
+        val label = "${currentVoiceIndex + 1}/${spanishVoices.size}"
+        speak("¡Hola! ¿Te gusta esta voz?")
+        return label
     }
 
     fun speak(text: String, onDone: (() -> Unit)? = null) {

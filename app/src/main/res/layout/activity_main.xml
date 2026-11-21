@@ -71,11 +71,24 @@
             android:gravity="end">
 
             <Button
+                android:id="@+id/btnChangeVoice"
+                android:layout_width="wrap_content"
+                android:layout_height="44dp"
+                android:layout_marginEnd="10dp"
+                android:background="@drawable/bg_boton_blanco"
+                android:paddingHorizontal="14dp"
+                android:text="🗣️ Cambiar voz"
+                android:textAllCaps="false"
+                android:textColor="#333333"
+                android:textSize="14sp"
+                android:textStyle="bold" />
+
+            <Button
                 android:id="@+id/btnChangeName"
                 android:layout_width="wrap_content"
                 android:layout_height="44dp"
                 android:background="@drawable/bg_boton_blanco"
-                android:paddingHorizontal="16dp"
+                android:paddingHorizontal="14dp"
                 android:text="✏️ Cambiar nombre"
                 android:textAllCaps="false"
                 android:textColor="#333333"
