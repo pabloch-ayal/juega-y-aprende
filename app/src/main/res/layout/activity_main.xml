@@ -97,7 +97,7 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="4dp"
             android:layout_marginBottom="18dp"
-            android:text="Elige qué quieres aprender hoy"
+            android:text="Elige qué quieres aprender hoy · Por César IA"
             android:textColor="#263238"
             android:textSize="20sp"
             android:textStyle="bold" />
