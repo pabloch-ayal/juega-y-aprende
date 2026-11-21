@@ -106,11 +106,7 @@ class MainActivity : AppCompatActivity() {
         btnToggleMode.setOnClickListener {
             voiceHelper.playTapSound()
             hideBeeGuide()
-            if (currentMode == "learn") {
-                startQuizMode()
-            } else {
-                startLearnMode()
-            }
+            if (currentMode == "learn") startQuizMode() else startLearnMode()
         }
     }
 
@@ -145,7 +141,6 @@ class MainActivity : AppCompatActivity() {
         hideBeeGuide()
         btnToggleMode.text = "🎮 ¡A jugar!"
         btnToggleMode.backgroundTintList = android.content.res.ColorStateList.valueOf(Color.parseColor("#43A047"))
-
         stageGridContainer.removeAllViews()
 
         val grid = GridLayout(this).apply {
@@ -160,16 +155,8 @@ class MainActivity : AppCompatActivity() {
         if (currentTopic == "colors") {
             currentInstruction = "$childName, toca cada color para aprender su nombre. Cuando estés lista, toca el botón verde para jugar."
             tvInstruction.text = "Toca los 12 colores para escucharlos"
-
             GameData.COLORS.forEach { item ->
-                val card = createCardView(
-                    bgHex = item.hexColor,
-                    topEmoji = item.emoji,
-                    mainText = item.name,
-                    subText = null,
-                    darkText = item.darkText,
-                    isCompact = true
-                )
+                val card = createCardView(item.hexColor, item.emoji, item.name, null, item.darkText, true)
                 card.setOnClickListener {
                     voiceHelper.playTapSound()
                     animateBounce(card)
@@ -180,16 +167,8 @@ class MainActivity : AppCompatActivity() {
         } else {
             currentInstruction = "$childName, toca cada número del uno al diez para aprenderlo. Cuando estés lista, toca el botón verde para jugar."
             tvInstruction.text = "Toca los números del 1 al 10"
-
             GameData.NUMBERS.forEach { item ->
-                val card = createCardView(
-                    bgHex = item.hexColor,
-                    topEmoji = item.number.toString(),
-                    mainText = item.word,
-                    subText = item.itemsEmoji,
-                    darkText = false,
-                    isCompact = true
-                )
+                val card = createCardView(item.hexColor, item.number.toString(), item.word, item.itemsEmoji, false, true)
                 card.setOnClickListener {
                     voiceHelper.playTapSound()
                     animateBounce(card)
@@ -198,7 +177,6 @@ class MainActivity : AppCompatActivity() {
                 grid.addView(card)
             }
         }
-
         stageGridContainer.addView(grid)
         voiceHelper.speak(currentInstruction)
     }
@@ -227,64 +205,30 @@ class MainActivity : AppCompatActivity() {
         if (currentTopic == "colors") {
             val options = GameData.COLORS.shuffled().take(4)
             val target = options.random()
-
-            currentInstruction = "$childName, toca el color ${target.name}"
+            currentInstruction = "$childName, toca el color${target.name}"
             tvInstruction.text = "Toca el color ${target.name}"
-
             var targetCardView: View? = null
 
             options.forEach { item ->
-                val card = createCardView(
-                    bgHex = item.hexColor,
-                    topEmoji = item.emoji,
-                    mainText = item.name,
-                    subText = null,
-                    darkText = item.darkText,
-                    isCompact = false
-                )
-                if (item.name == target.name) {
-                    targetCardView = card
-                }
-
+                val card = createCardView(item.hexColor, item.emoji, item.name, null, item.darkText, false)
+                if (item.name == target.name) targetCardView = card
                 card.setOnClickListener {
-                    handleQuizClick(
-                        clickedView = card,
-                        correctView = targetCardView,
-                        isCorrect = item.name == target.name,
-                        spokenLabel = "el color ${item.name}"
-                    )
+                    handleQuizClick(card, targetCardView, item.name == target.name, "el color ${item.name}")
                 }
                 rowLayout.addView(card)
             }
         } else {
             val options = GameData.NUMBERS.shuffled().take(4)
             val target = options.random()
-
             currentInstruction = "$childName, busca el número ${target.word}"
             tvInstruction.text = "Busca el número ${target.number}"
-
             var targetCardView: View? = null
 
             options.forEach { item ->
-                val card = createCardView(
-                    bgHex = item.hexColor,
-                    topEmoji = item.number.toString(),
-                    mainText = item.word,
-                    subText = item.itemsEmoji,
-                    darkText = false,
-                    isCompact = false
-                )
-                if (item.number == target.number) {
-                    targetCardView = card
-                }
-
+                val card = createCardView(item.hexColor, item.number.toString(), item.word, item.itemsEmoji, false, false)
+                if (item.number == target.number) targetCardView = card
                 card.setOnClickListener {
-                    handleQuizClick(
-                        clickedView = card,
-                        correctView = targetCardView,
-                        isCorrect = item.number == target.number,
-                        spokenLabel = "el número ${item.word}"
-                    )
+                    handleQuizClick(card, targetCardView, item.number == target.number, "el número ${item.word}")
                 }
                 rowLayout.addView(card)
             }
@@ -294,33 +238,21 @@ class MainActivity : AppCompatActivity() {
         voiceHelper.speak(currentInstruction)
     }
 
-    private fun handleQuizClick(
-        clickedView: View,
-        correctView: View?,
-        isCorrect: Boolean,
-        spokenLabel: String
-    ) {
+    private fun handleQuizClick(clickedView: View, correctView: View?, isCorrect: Boolean, spokenLabel: String) {
         if (isLocked) return
-
         if (isCorrect) {
             isLocked = true
             hideBeeGuide()
             voiceHelper.playSuccessSound()
             animateBounce(clickedView)
-
-            val praise = GameData.getPraise(childName)
-            voiceHelper.speak(praise) {
-                runOnUiThread {
-                    nextQuizRound()
-                }
+            voiceHelper.speak(GameData.getPraise(childName)) {
+                runOnUiThread { nextQuizRound() }
             }
         } else {
             voiceHelper.playWrongSound()
             animateShake(clickedView)
             voiceHelper.speak("Ese es $spokenLabel. Mira, la abejita te ayuda, $childName.")
-            if (correctView != null) {
-                flyBeeToTarget(correctView)
-            }
+            if (correctView != null) flyBeeToTarget(correctView)
         }
     }
 
@@ -328,7 +260,6 @@ class MainActivity : AppCompatActivity() {
         targetView.post {
             val targetLoc = IntArray(2)
             targetView.getLocationOnScreen(targetLoc)
-
             val destX = targetLoc[0] + (targetView.width / 2f) - (ivBeeGuide.width / 2f)
             val destY = targetLoc[1] + 12f
 
@@ -339,9 +270,7 @@ class MainActivity : AppCompatActivity() {
             }
 
             ivBeeGuide.animate()
-                .x(destX)
-                .y(destY)
-                .setDuration(650L)
+                .x(destX).y(destY).setDuration(650L)
                 .setInterpolator(OvershootInterpolator(1.2f))
                 .withEndAction {
                     beePulseAnim?.cancel()
@@ -355,8 +284,7 @@ class MainActivity : AppCompatActivity() {
                         repeatMode = ObjectAnimator.REVERSE
                         start()
                     }
-                }
-                .start()
+                }.start()
         }
     }
 
@@ -368,31 +296,24 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun createCardView(
-        bgHex: String,
-        topEmoji: String,
-        mainText: String,
-        subText: String?,
-        darkText: Boolean,
-        isCompact: Boolean
+        bgHex: String, topEmoji: String, mainText: String,
+        subText: String?, darkText: Boolean, isCompact: Boolean
     ): LinearLayout {
         val card = LinearLayout(this).apply {
             orientation = LinearLayout.VERTICAL
             gravity = Gravity.CENTER
-            setPadding(10, 10, 10, 10)
+            setPadding(8, 8, 8, 8)
             isClickable = true
             isFocusable = true
-
             background = GradientDrawable().apply {
                 shape = GradientDrawable.RECTANGLE
                 cornerRadius = 42f
                 setColor(Color.parseColor(bgHex))
                 setStroke(8, Color.parseColor("#40000000"))
             }
-
             layoutParams = if (isCompact) {
                 GridLayout.LayoutParams().apply {
-                    width = 0
-                    height = 0
+                    width = 0; height = 0
                     columnSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                     rowSpec = GridLayout.spec(GridLayout.UNDEFINED, 1f)
                     setMargins(8, 8, 8, 8)
@@ -404,15 +325,26 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val badgeSize = if (isCompact) 86 else 140
+        val isNumberCard = (subText != null)
         val badge = TextView(this).apply {
             text = topEmoji
-            textSize = if (isCompact) 28f else 48f
             gravity = Gravity.CENTER
-            setTextColor(Color.parseColor("#212121"))
             setTypeface(null, Typeface.BOLD)
-            setBackgroundResource(R.drawable.bg_circulo_suave)
-            layoutParams = LinearLayout.LayoutParams(badgeSize, badgeSize)
+            if (isNumberCard) {
+                textSize = if (isCompact) 48f else 112f
+                setTextColor(Color.parseColor("#FFF59D"))
+                setShadowLayer(8f, 3f, 3f, Color.parseColor("#80000000"))
+                layoutParams = LinearLayout.LayoutParams(
+                    LinearLayout.LayoutParams.WRAP_CONTENT,
+                    LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+            } else {
+                val badgeSize = if (isCompact) 86 else 145
+                textSize = if (isCompact) 30f else 54f
+                setTextColor(Color.parseColor("#212121"))
+                setBackgroundResource(R.drawable.bg_circulo_suave)
+                layoutParams = LinearLayout.LayoutParams(badgeSize, badgeSize)
+            }
         }
         card.addView(badge)
 
@@ -422,7 +354,7 @@ class MainActivity : AppCompatActivity() {
             gravity = Gravity.CENTER
             setTextColor(if (darkText) Color.parseColor("#212121") else Color.WHITE)
             setTypeface(null, Typeface.BOLD)
-            setPadding(0, 6, 0, 0)
+            setPadding(0, 4, 0, 0)
         }
         card.addView(label)
 
@@ -435,25 +367,18 @@ class MainActivity : AppCompatActivity() {
             }
             card.addView(itemsView)
         }
-
         return card
     }
 
     private fun animateBounce(view: View) {
-        view.animate()
-            .scaleX(1.12f)
-            .scaleY(1.12f)
-            .setDuration(180L)
-            .withEndAction {
-                view.animate().scaleX(1f).scaleY(1f).setDuration(180L).start()
-            }
-            .start()
+        view.animate().scaleX(1.12f).scaleY(1.12f).setDuration(180L).withEndAction {
+            view.animate().scaleX(1f).scaleY(1f).setDuration(180L).start()
+        }.start()
     }
 
     private fun animateShake(view: View) {
         ObjectAnimator.ofFloat(view, "translationX", 0f, -18f, 18f, -12f, 12f, 0f).apply {
-            duration = 350L
-            start()
+            duration = 350L; start()
         }
     }
 

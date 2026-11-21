@@ -18,33 +18,37 @@ class VoiceHelper(context: Context) {
         tts = TextToSpeech(context.applicationContext) { status ->
             if (status == TextToSpeech.SUCCESS) {
                 val engine = tts ?: return@TextToSpeech
-                val localeEs = Locale("es", "PE")
-                val res = engine.setLanguage(localeEs)
+                val res = engine.setLanguage(Locale("es", "US"))
                 if (res == TextToSpeech.LANG_MISSING_DATA || res == TextToSpeech.LANG_NOT_SUPPORTED) {
                     engine.setLanguage(Locale("es", "ES"))
                 }
 
-                // Buscar voz femenina natural/neuronal disponible en el dispositivo
                 try {
-                    val voices = engine.voices
-                    val sweetVoice = voices?.firstOrNull { v ->
-                        v.locale.language == "es" &&
-                        !v.isNetworkConnectionRequired &&
-                        (v.name.contains("female", true) ||
-                         v.name.contains("es-us-x-sfb", true) ||
-                         v.name.contains("es-es-x-eef", true) ||
-                         v.name.contains("neural", true))
-                    } ?: voices?.firstOrNull { v ->
-                        v.locale.language == "es" && !v.isNetworkConnectionRequired
+                    val voices = engine.voices?.filter { it.locale.language == "es" } ?: emptyList()
+                    // Códigos conocidos de voces femeninas de Google TTS en español
+                    val femaleCodes = listOf("sfb", "eef", "esd", "tpf", "f00", "female", "mujer", "sabina", "paulina", "monica", "helena", "laura")
+                    // Excluir explícitamente voces masculinas
+                    val maleCodes = listOf("sfd", "eec", "esf", "tpd", "m00", "male", "hombre", "jorge", "diego", "carlos", "pablo")
+
+                    val chosenVoice = voices.firstOrNull { v ->
+                        val n = v.name.lowercase()
+                        !v.isNetworkConnectionRequired && femaleCodes.any { n.contains(it) }
+                    } ?: voices.firstOrNull { v ->
+                        val n = v.name.lowercase()
+                        femaleCodes.any { n.contains(it) }
+                    } ?: voices.firstOrNull { v ->
+                        val n = v.name.lowercase()
+                        !v.isNetworkConnectionRequired && maleCodes.none { n.contains(it) }
                     }
-                    if (sweetVoice != null) {
-                        engine.voice = sweetVoice
+
+                    if (chosenVoice != null) {
+                        engine.voice = chosenVoice
                     }
                 } catch (_: Exception) {}
 
-                // Tono dulce, cálido y pausado tipo maestra de inicial
-                engine.setPitch(1.18f)
-                engine.setSpeechRate(0.92f)
+                // Tono fino, dulce y melodioso
+                engine.setPitch(1.25f)
+                engine.setSpeechRate(0.90f)
                 isReady = true
             }
         }
@@ -62,43 +66,30 @@ class VoiceHelper(context: Context) {
         engine.setOnUtteranceProgressListener(object : UtteranceProgressListener() {
             override fun onStart(id: String?) {}
             override fun onDone(id: String?) {
-                if (id == utteranceId) {
-                    onDone?.invoke()
-                }
+                if (id == utteranceId) onDone?.invoke()
             }
             @Deprecated("Deprecated in Java")
             override fun onError(id: String?) {
-                if (id == utteranceId) {
-                    onDone?.invoke()
-                }
+                if (id == utteranceId) onDone?.invoke()
             }
         })
 
-        val params = Bundle()
-        engine.speak(text, TextToSpeech.QUEUE_FLUSH, params, utteranceId)
+        engine.speak(text, TextToSpeech.QUEUE_FLUSH, Bundle(), utteranceId)
     }
 
     fun playSuccessSound() {
-        try {
-            toneGen.startTone(ToneGenerator.TONE_PROP_ACK, 220)
-        } catch (_: Exception) {}
+        try { toneGen.startTone(ToneGenerator.TONE_PROP_ACK, 220) } catch (_: Exception) {}
     }
 
     fun playTapSound() {
-        try {
-            toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 90)
-        } catch (_: Exception) {}
+        try { toneGen.startTone(ToneGenerator.TONE_PROP_BEEP, 90) } catch (_: Exception) {}
     }
 
     fun playWrongSound() {
-        try {
-            toneGen.startTone(ToneGenerator.TONE_PROP_NACK, 180)
-        } catch (_: Exception) {}
+        try { toneGen.startTone(ToneGenerator.TONE_PROP_NACK, 180) } catch (_: Exception) {}
     }
 
-    fun stop() {
-        tts?.stop()
-    }
+    fun stop() { tts?.stop() }
 
     fun shutdown() {
         tts?.stop()
