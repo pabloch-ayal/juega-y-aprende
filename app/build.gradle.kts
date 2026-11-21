@@ -5,7 +5,7 @@ plugins {
 
 android {
     namespace = "com.rasecalay.juegayaprende"
-    compileSdk = 34
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "com.rasecalay.juegayaprende"
