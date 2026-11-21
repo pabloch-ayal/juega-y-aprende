@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="120dp"
+    android:height="120dp"
+    android:viewportWidth="120"
+    android:viewportHeight="120">
+    <!-- Alitas -->
+    <path
+        android:fillColor="#E1F5FE"
+        android:strokeColor="#4FC3F7"
+        android:strokeWidth="3"
+        android:pathData="M48,42 C25,15 10,38 38,54 Z" />
+    <path
+        android:fillColor="#E1F5FE"
+        android:strokeColor="#4FC3F7"
+        android:strokeWidth="3"
+        android:pathData="M72,42 C95,15 110,38 82,54 Z" />
+    <!-- Antenas -->
+    <path
+        android:strokeColor="#3E2723"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:pathData="M50,34 Q42,16 34,18" />
+    <path
+        android:strokeColor="#3E2723"
+        android:strokeWidth="3.5"
+        android:strokeLineCap="round"
+        android:pathData="M70,34 Q78,16 86,18" />
+    <path
+        android:fillColor="#FF7043"
+        android:pathData="M34,18 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+    <path
+        android:fillColor="#FF7043"
+        android:pathData="M86,18 m-5,0 a5,5 0 1,0 10,0 a5,5 0 1,0 -10,0" />
+    <!-- Cuerpo amarillo -->
+    <path
+        android:fillColor="#FFD600"
+        android:strokeColor="#3E2723"
+        android:strokeWidth="4"
+        android:pathData="M60,34 C82,34 94,50 94,72 C94,94 80,106 60,106 C40,106 26,94 26,72 C26,50 38,34 60,34 Z" />
+    <!-- Franjas oscuras -->
+    <path
+        android:fillColor="#3E2723"
+        android:pathData="M28,68 Q60,76 92,68 L91,78 Q60,86 29,78 Z" />
+    <path
+        android:fillColor="#3E2723"
+        android:pathData="M33,86 Q60,93 87,86 L83,95 Q60,101 37,95 Z" />
+    <!-- Ojos y sonrisa -->
+    <path
+        android:fillColor="#212121"
+        android:pathData="M48,50 m-4.5,0 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0" />
+    <path
+        android:fillColor="#212121"
+        android:pathData="M72,50 m-4.5,0 a4.5,4.5 0 1,0 9,0 a4.5,4.5 0 1,0 -9,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M46.5,48.5 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+    <path
+        android:fillColor="#FFFFFF"
+        android:pathData="M70.5,48.5 m-1.5,0 a1.5,1.5 0 1,0 3,0 a1.5,1.5 0 1,0 -3,0" />
+    <!-- Mejillas rosadas -->
+    <path
+        android:fillColor="#FF8A80"
+        android:pathData="M40,56 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <path
+        android:fillColor="#FF8A80"
+        android:pathData="M80,56 m-4,0 a4,4 0 1,0 8,0 a4,4 0 1,0 -8,0" />
+    <!-- Sonrisa -->
+    <path
+        android:strokeColor="#3E2723"
+        android:strokeWidth="3"
+        android:strokeLineCap="round"
+        android:fillColor="#00000000"
+        android:pathData="M53,58 Q60,65 67,58" />
+</vector>
